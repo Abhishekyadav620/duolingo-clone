@@ -23,7 +23,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return 'system';
   });
 
-  const [isDark, setIsDark] = useState<boolean>(false);
+  const isDark =
+    theme === 'dark' ||
+    (theme === 'system' &&
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -31,25 +35,17 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem('learnly_theme', theme);
     const root = document.documentElement;
 
-    let effectiveDark = false;
-    if (theme === 'dark') {
-      effectiveDark = true;
-    } else if (theme === 'light') {
-      effectiveDark = false;
-    } else {
-      effectiveDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
+    const effectiveDark =
+      theme === 'dark' ||
+      (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
     if (effectiveDark) {
       root.classList.add('dark');
+      document.body?.classList.add('dark');
     } else {
       root.classList.remove('dark');
+      document.body?.classList.remove('dark');
     }
-
-    const timer = setTimeout(() => {
-      setIsDark(effectiveDark);
-    }, 0);
-    return () => clearTimeout(timer);
   }, [theme]);
 
   const setTheme = (newTheme: Theme) => {
