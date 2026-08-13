@@ -45,7 +45,12 @@ export const FeedbackBar: React.FC<FeedbackBarProps> = ({
       const res = await getAIExplanation(exerciseId, userAnswer);
       setExplanation(res.explanation);
     } catch {
-      setExplanation(`The correct answer is "${correctAnswer}".`);
+      const cleanAns = (correctAnswer || '').trim();
+      if (cleanAns) {
+        setExplanation(`The correct answer is "${cleanAns}".`);
+      } else {
+        setExplanation("Review your answer and try selecting a different option.");
+      }
     } finally {
       setLoadingExplanation(false);
     }
@@ -121,9 +126,9 @@ export const FeedbackBar: React.FC<FeedbackBarProps> = ({
                       )}
                     </div>
 
-                    {correctAnswer ? (
+                    {correctAnswer && correctAnswer.trim() ? (
                       <div className="text-xs sm:text-sm font-extrabold text-zinc-800 dark:text-rose-100 bg-white/80 dark:bg-rose-950/80 px-3 py-1.5 rounded-xl border border-rose-300 dark:border-rose-800 inline-block">
-                        The correct option is: <span className="font-black text-[#FF4B4B] underline">{correctAnswer}</span>
+                        The correct option is: <span className="font-black text-[#FF4B4B] underline">{correctAnswer.trim()}</span>
                       </div>
                     ) : (
                       <p className="text-xs text-zinc-600 dark:text-rose-200 font-bold">

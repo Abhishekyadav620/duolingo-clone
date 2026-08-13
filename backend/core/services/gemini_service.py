@@ -63,17 +63,21 @@ RULES:
 
     def explain_mistake(self, question: str, user_answer: str, correct_answer: str) -> str:
         client, model_name = self.get_client()
+        clean_correct = (correct_answer or "").strip()
+
         if not client:
-            return f"The correct answer is '{correct_answer}'. Compare your answer '{user_answer}' to see the difference."
+            if clean_correct:
+                return f"The correct answer is '{clean_correct}'. Compare your answer '{user_answer}' to see the difference."
+            return f"Review your answer '{user_answer}' and try selecting a different option."
 
         prompt = f"""
 You are an encouraging Spanish tutor explaining a student's mistake.
 Question: {question}
 Student's Incorrect Answer: {user_answer}
-Correct Answer: {correct_answer}
+Correct Answer: {clean_correct if clean_correct else 'Authoritative correct option'}
 
 RULES:
-1. Explain concisely (2-3 sentences max) why '{user_answer}' is incorrect and why '{correct_answer}' is right.
+1. Explain concisely (2-3 sentences max) why '{user_answer}' is incorrect and why '{clean_correct}' is right.
 2. Keep the tone friendly, positive, and educational.
 """
         try:
@@ -81,10 +85,10 @@ RULES:
                 model=model_name,
                 contents=prompt,
             )
-            return response.text.strip() if response.text else f"'{correct_answer}' is the right translation here."
+            return response.text.strip() if response.text else (f"'{clean_correct}' is the right translation here." if clean_correct else "Review the question carefully.")
         except Exception as e:
             logger.error(f"Gemini explain_mistake error: {e}")
-            return f"AI Error: {str(e)}"
+            return f"The correct answer is '{clean_correct}'." if clean_correct else "Please try again."
 
     def ask_tutor(self, message: str) -> str:
         api_key = os.environ.get("GEMINI_API_KEY", "").strip()
