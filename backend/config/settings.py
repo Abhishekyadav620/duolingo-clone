@@ -75,6 +75,12 @@ CORS_ALLOWED_ORIGINS = [o.strip().rstrip('/') for o in cors_origins_raw.split(',
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [o.strip().rstrip('/') for o in cors_origins_raw.split(',') if o.strip()]
 
+# Session & CSRF Cookie Settings for Cross-Site Deployment
+SESSION_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
+CSRF_COOKIE_SECURE = not DEBUG
+
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [

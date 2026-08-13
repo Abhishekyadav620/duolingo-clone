@@ -59,7 +59,7 @@ class CourseDetailView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        learner = get_default_learner()
+        learner = get_default_learner(request)
         course = Course.objects.prefetch_related('units__skills__lessons').first()
         if not course:
             return Response(
