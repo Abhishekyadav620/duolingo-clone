@@ -45,7 +45,7 @@ export const FeedbackBar: React.FC<FeedbackBarProps> = ({
       const res = await getAIExplanation(exerciseId, userAnswer);
       setExplanation(res.explanation);
     } catch {
-      setExplanation(`'${correctAnswer}' is the correct answer for this question.`);
+      setExplanation(`The correct answer is "${correctAnswer}".`);
     } finally {
       setLoadingExplanation(false);
     }
@@ -94,15 +94,15 @@ export const FeedbackBar: React.FC<FeedbackBarProps> = ({
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className="flex items-center gap-3.5"
+                  className="flex items-start gap-3.5"
                 >
-                  <div className="w-10 h-10 rounded-2xl bg-white text-[#FF4B4B] flex items-center justify-center shadow-md shrink-0">
+                  <div className="w-10 h-10 rounded-2xl bg-white text-[#FF4B4B] flex items-center justify-center shadow-md shrink-0 mt-0.5">
                     <XCircle className="w-7 h-7 stroke-[3]" />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h4 className="text-xl font-black text-[#FF4B4B] dark:text-rose-300 tracking-tight">
-                        Not quite
+                        Incorrect Answer
                       </h4>
                       {/* AI Explain Button */}
                       {!explanation && (
@@ -122,12 +122,12 @@ export const FeedbackBar: React.FC<FeedbackBarProps> = ({
                     </div>
 
                     {correctAnswer ? (
-                      <p className="text-xs text-zinc-700 dark:text-rose-200 font-extrabold mt-0.5">
-                        Correct answer: <span className="underline decoration-rose-500 font-black">{correctAnswer}</span>
-                      </p>
+                      <div className="text-xs sm:text-sm font-extrabold text-zinc-800 dark:text-rose-100 bg-white/80 dark:bg-rose-950/80 px-3 py-1.5 rounded-xl border border-rose-300 dark:border-rose-800 inline-block">
+                        The correct option is: <span className="font-black text-[#FF4B4B] underline">{correctAnswer}</span>
+                      </div>
                     ) : (
                       <p className="text-xs text-zinc-600 dark:text-rose-200 font-bold">
-                        That&apos;s not the right answer
+                        That is not the correct option.
                       </p>
                     )}
                   </div>

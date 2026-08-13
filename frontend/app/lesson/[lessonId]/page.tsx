@@ -256,6 +256,7 @@ export default function LessonPage({ params }: LessonPageProps) {
             onSelectAnswer={setSelectedAnswer}
             submitted={submitted}
             isCorrect={isCorrect}
+            correctAnswer={correctAnswer}
             onCheck={handleCheck}
           />
         ) : (

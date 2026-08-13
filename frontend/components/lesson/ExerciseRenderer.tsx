@@ -20,6 +20,7 @@ export interface ExerciseRendererProps {
   onSelectAnswer: (answer: string) => void;
   submitted: boolean;
   isCorrect: boolean | null;
+  correctAnswer?: string;
   onCheck: () => void;
 }
 
@@ -29,6 +30,7 @@ export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
   onSelectAnswer,
   submitted,
   isCorrect,
+  correctAnswer,
   onCheck,
 }) => {
   const normalizedType = (exercise.type || '').toLowerCase();
@@ -67,6 +69,7 @@ export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
             onSelectAnswer={onSelectAnswer}
             submitted={submitted}
             isCorrect={isCorrect}
+            correctAnswer={correctAnswer}
           />
         );
 

@@ -419,27 +419,39 @@ export default function PracticePage() {
               <div className="space-y-3">
                 {listeningChoices.map((choice, i) => {
                   const isSelected = selectedListening === i;
+                  const showWrong = listeningSubmitted && isSelected && !choice.isCorrect;
+                  const showCorrect = listeningSubmitted && choice.isCorrect;
+
                   return (
                     <button
                       key={i}
                       disabled={listeningSubmitted}
                       onClick={() => { setSelectedListening(i); setListeningSubmitted(true); }}
-                      className={`w-full p-4 rounded-2xl border-2 font-black text-left text-base sm:text-lg transition cursor-pointer ${
-                        isSelected
-                          ? choice.isCorrect
-                            ? 'bg-emerald-50 dark:bg-emerald-950/60 border-[#58CC02] text-[#58CC02]'
-                            : 'bg-rose-50 dark:bg-rose-950/60 border-rose-500 text-rose-500'
+                      className={`w-full p-4 rounded-2xl border-2 font-black text-left text-base sm:text-lg transition cursor-pointer flex items-center justify-between gap-3 ${
+                        showCorrect
+                          ? 'bg-emerald-50 dark:bg-emerald-950/60 border-[#58CC02] text-[#58CC02]'
+                          : showWrong
+                          ? 'bg-rose-50 dark:bg-rose-950/60 border-rose-500 text-rose-500'
+                          : isSelected
+                          ? 'bg-sky-50 dark:bg-sky-950/60 border-[#1CB0F6] text-[#1CB0F6]'
                           : 'bg-white dark:bg-zinc-850 border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                       }`}
                     >
-                      {choice.label}
+                      <span>{choice.label}</span>
+                      {showCorrect && <span className="text-xs font-black bg-emerald-500 text-white px-2.5 py-1 rounded-xl">✓ Correct Option</span>}
+                      {showWrong && <span className="text-xs font-black bg-rose-500 text-white px-2.5 py-1 rounded-xl">❌ Wrong Option</span>}
                     </button>
                   );
                 })}
               </div>
 
               {listeningSubmitted && (
-                <div className="pt-2">
+                <div className="space-y-3 pt-2">
+                  {selectedListening !== null && !listeningChoices[selectedListening].isCorrect && (
+                    <div className="p-3 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 rounded-2xl text-xs font-black text-rose-700 dark:text-rose-200">
+                      The correct option is: <span className="underline">{listeningChoices.find(c => c.isCorrect)?.label}</span>
+                    </div>
+                  )}
                   <Button variant="primary" fullWidth onClick={() => { setSelectedListening(null); setListeningSubmitted(false); }}>
                     Try Another Listening Exercise
                   </Button>
@@ -478,24 +490,35 @@ export default function PracticePage() {
                     {TIMED_QUESTIONS[timedIndex].options.map((opt) => {
                       const isSelected = selectedTimedOption === opt;
                       const isCorrectOpt = opt === TIMED_QUESTIONS[timedIndex].correct;
+                      const showWrong = selectedTimedOption !== null && isSelected && !isCorrectOpt;
+                      const showCorrect = selectedTimedOption !== null && isCorrectOpt;
+
                       return (
                         <button
                           key={opt}
                           disabled={selectedTimedOption !== null}
                           onClick={() => handleAnswerTimed(opt)}
-                          className={`p-4 rounded-2xl border-2 font-black text-left text-base transition cursor-pointer ${
-                            isSelected
-                              ? isCorrectOpt
-                                ? 'bg-emerald-50 border-[#58CC02] text-[#58CC02]'
-                                : 'bg-rose-50 border-rose-500 text-rose-500'
+                          className={`p-4 rounded-2xl border-2 font-black text-left text-base transition cursor-pointer flex items-center justify-between gap-3 ${
+                            showCorrect
+                              ? 'bg-emerald-50 border-[#58CC02] text-[#58CC02]'
+                              : showWrong
+                              ? 'bg-rose-50 border-rose-500 text-rose-500'
                               : 'bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white hover:bg-zinc-100'
                           }`}
                         >
-                          {opt}
+                          <span>{opt}</span>
+                          {showCorrect && <span className="text-xs font-black bg-emerald-500 text-white px-2 py-0.5 rounded-lg">✓ Correct</span>}
+                          {showWrong && <span className="text-xs font-black bg-rose-500 text-white px-2 py-0.5 rounded-lg">❌ Wrong</span>}
                         </button>
                       );
                     })}
                   </div>
+
+                  {selectedTimedOption !== null && selectedTimedOption !== TIMED_QUESTIONS[timedIndex].correct && (
+                    <div className="p-3 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 rounded-2xl text-xs font-black text-rose-700 dark:text-rose-200">
+                      The correct option is: <span className="underline">{TIMED_QUESTIONS[timedIndex].correct}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -570,24 +593,35 @@ export default function PracticePage() {
                     {TIMED_QUESTIONS[legendaryIndex].options.map((opt) => {
                       const isSelected = selectedLegendary === opt;
                       const isCorrectOpt = opt === TIMED_QUESTIONS[legendaryIndex].correct;
+                      const showWrong = selectedLegendary !== null && isSelected && !isCorrectOpt;
+                      const showCorrect = selectedLegendary !== null && isCorrectOpt;
+
                       return (
                         <button
                           key={opt}
                           disabled={selectedLegendary !== null}
                           onClick={() => handleAnswerLegendary(opt)}
-                          className={`p-4 rounded-2xl border-2 font-black text-left text-base transition cursor-pointer ${
-                            isSelected
-                              ? isCorrectOpt
-                                ? 'bg-emerald-950 border-[#58CC02] text-[#58CC02]'
-                                : 'bg-rose-950 border-rose-500 text-rose-500'
+                          className={`p-4 rounded-2xl border-2 font-black text-left text-base transition cursor-pointer flex items-center justify-between gap-3 ${
+                            showCorrect
+                              ? 'bg-emerald-950 border-[#58CC02] text-[#58CC02]'
+                              : showWrong
+                              ? 'bg-rose-950 border-rose-500 text-rose-500'
                               : 'bg-zinc-800/80 border-zinc-700 text-white hover:bg-zinc-800'
                           }`}
                         >
-                          {opt}
+                          <span>{opt}</span>
+                          {showCorrect && <span className="text-xs font-black bg-emerald-500 text-white px-2 py-0.5 rounded-lg">✓ Correct</span>}
+                          {showWrong && <span className="text-xs font-black bg-rose-500 text-white px-2 py-0.5 rounded-lg">❌ Wrong</span>}
                         </button>
                       );
                     })}
                   </div>
+
+                  {selectedLegendary !== null && selectedLegendary !== TIMED_QUESTIONS[legendaryIndex].correct && (
+                    <div className="p-3 bg-rose-950/80 border border-rose-800 rounded-2xl text-xs font-black text-rose-200">
+                      The correct option is: <span className="underline text-white">{TIMED_QUESTIONS[legendaryIndex].correct}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
