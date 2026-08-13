@@ -71,9 +71,9 @@ cors_origins_raw = os.environ.get(
     'CORS_ALLOWED_ORIGINS',
     'http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001'
 )
-CORS_ALLOWED_ORIGINS = [o.strip() for o in cors_origins_raw.split(',') if o.strip()]
+CORS_ALLOWED_ORIGINS = [o.strip().rstrip('/') for o in cors_origins_raw.split(',') if o.strip()]
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = [o.strip() for o in cors_origins_raw.split(',') if o.strip()]
+CSRF_TRUSTED_ORIGINS = [o.strip().rstrip('/') for o in cors_origins_raw.split(',') if o.strip()]
 
 ROOT_URLCONF = 'config.urls'
 

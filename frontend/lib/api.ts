@@ -19,7 +19,16 @@ import {
   AuthResponse
 } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
+const getApiBaseUrl = (): string => {
+  const rawUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
+  const trimmed = rawUrl.trim().replace(/\/+$/, '');
+  if (!trimmed.endsWith('/api')) {
+    return `${trimmed}/api`;
+  }
+  return trimmed;
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

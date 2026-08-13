@@ -135,7 +135,7 @@ export default function Home() {
             </div>
             <h2 className="text-xl font-black text-zinc-900 dark:text-white">Unable to load learning path</h2>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Please check that the Django backend server is running on <code className="font-mono text-xs bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">http://127.0.0.1:8000</code>.
+              Please check that the backend API server is running and accessible.
             </p>
             <Button variant="primary" onClick={loadData} fullWidth>
               <RefreshCw className="w-4 h-4 mr-2" />
