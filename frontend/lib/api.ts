@@ -15,6 +15,7 @@ import {
   AITutorResponse,
   AIWordExplainResponse,
   AILessonSummaryResponse,
+  AISpeakingFeedbackResponse,
   AuthResponse
 } from '@/types';
 
@@ -120,6 +121,17 @@ export const explainWord = async (word: string): Promise<AIWordExplainResponse> 
 export const getLessonSummary = async (lessonId: number): Promise<AILessonSummaryResponse> => {
   const response = await apiClient.post<AILessonSummaryResponse>('/ai/lesson-summary/', {
     lesson_id: lessonId,
+  });
+  return response.data;
+};
+
+export const getAISpeakingFeedback = async (
+  expectedText: string,
+  recognizedText: string
+): Promise<AISpeakingFeedbackResponse> => {
+  const response = await apiClient.post<AISpeakingFeedbackResponse>('/ai/speaking-feedback/', {
+    expected_text: expectedText,
+    recognized_text: recognizedText,
   });
   return response.data;
 };

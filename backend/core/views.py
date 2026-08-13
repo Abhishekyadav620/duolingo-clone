@@ -409,6 +409,24 @@ class AILessonSummaryView(APIView):
         return Response({"summary": summary}, status=status.HTTP_200_OK)
 
 
+class AISpeakingFeedbackView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        expected_text = request.data.get('expected_text', '').strip()
+        recognized_text = request.data.get('recognized_text', '').strip()
+
+        if not expected_text:
+            return Response({"detail": "expected_text is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        from .services.gemini_service import gemini_service
+        feedback = gemini_service.explain_speaking_mistake(
+            expected_text=expected_text,
+            recognized_text=recognized_text
+        )
+        return Response({"feedback": feedback}, status=status.HTTP_200_OK)
+
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 

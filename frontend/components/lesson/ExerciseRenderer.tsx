@@ -11,6 +11,8 @@ import { TranslateExercise } from './exercises/TranslateExercise';
 import { MatchPairsExercise } from './exercises/MatchPairsExercise';
 import { FillBlankExercise } from './exercises/FillBlankExercise';
 import { TypeAnswerExercise } from './exercises/TypeAnswerExercise';
+import { ListeningExercise } from './exercises/ListeningExercise';
+import { SpeakingExercise } from './exercises/SpeakingExercise';
 
 export interface ExerciseRendererProps {
   exercise: PublicExercise;
@@ -105,6 +107,30 @@ export const ExerciseRenderer: React.FC<ExerciseRendererProps> = ({
       case 'type_answer':
         return (
           <TypeAnswerExercise
+            exercise={exercise}
+            selectedAnswer={selectedAnswer}
+            onSelectAnswer={onSelectAnswer}
+            submitted={submitted}
+            isCorrect={isCorrect}
+            onCheck={onCheck}
+          />
+        );
+
+      case 'listening':
+        return (
+          <ListeningExercise
+            exercise={exercise}
+            selectedAnswer={selectedAnswer}
+            onSelectAnswer={onSelectAnswer}
+            submitted={submitted}
+            isCorrect={isCorrect}
+            onCheck={onCheck}
+          />
+        );
+
+      case 'speaking':
+        return (
+          <SpeakingExercise
             exercise={exercise}
             selectedAnswer={selectedAnswer}
             onSelectAnswer={onSelectAnswer}

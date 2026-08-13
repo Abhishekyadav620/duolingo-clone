@@ -93,11 +93,14 @@ class Exercise(models.Model):
         MATCH_PAIRS = 'MATCH_PAIRS', 'Match Pairs'
         FILL_BLANK = 'FILL_BLANK', 'Fill in the Blank'
         TYPE_ANSWER = 'TYPE_ANSWER', 'Type Answer'
+        LISTENING = 'LISTENING', 'Listening'
+        SPEAKING = 'SPEAKING', 'Speaking'
 
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='exercises')
     exercise_type = models.CharField(max_length=50, choices=ExerciseType.choices, default=ExerciseType.MULTIPLE_CHOICE)
     question = models.TextField()
     correct_answer = models.TextField()
+    audio_text = models.TextField(blank=True, default='')
     options = models.JSONField(default=list, blank=True)
     order = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)

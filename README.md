@@ -14,15 +14,35 @@ This application implements a complete Duolingo-style learning experience with b
 - **Idempotent Data Seeding**: Custom management command (`python manage.py seed_data`) seeding 1 Spanish course, 3 units, 8 skills, 16 lessons, 80 exercises across 5 exercise types, default learner profile, and initial progress.
 
 ### 🎮 Interactive Lesson Engine
-- **Five Exercise Types**:
+- **Seven Exercise Types**:
   1. `Multiple Choice`: Select the correct translation from options.
   2. `Translate / Word Bank`: Tap word chips in sequence to build translations.
   3. `Match Pairs`: Interactive 2-column word pair matching grid.
   4. `Fill in the Blank`: Complete sentence gaps using option chips.
   5. `Type the Answer`: Controlled text input with whitespace trimming and case-insensitive normalization.
+  6. `Listening`: Listen to Spanish audio generated via browser Text-to-Speech with normal (1.0x) and slow (0.7x) playback controls.
+  7. `Speaking`: Practice speaking Spanish using browser Speech Recognition with real-time transcript display and optional AI feedback.
 - **Immediate Server Feedback**: Sticky feedback bar with emerald `✓ Correct!` and rose `✕ Not quite` banners.
 - **Heart Loss Animations**: Animated `❤️ -1` visual indicator when incorrect answers are submitted.
 - **Out-of-Hearts State**: Modal overlay blocking progress when hearts reach 0 with `[ REFILL HEARTS ]` CTA.
+
+---
+
+## 🎧 Speaking and Listening
+
+### Listening Practice
+- **Text-to-Speech**: Uses the browser's Web Speech API (`window.speechSynthesis`) to synthesize Spanish audio (`lang="es-ES"`) directly from seeded exercise content.
+- **Audio Speed Controls**: Learner can play audio at normal speed (`1.0x`) or slow speed (`0.7x`).
+- **Visual Waveform**: Animated visual waveform indicator bops dynamically during audio playback.
+
+### Speaking Practice
+- **Speech Recognition**: Uses browser Speech Recognition (`window.SpeechRecognition` / `window.webkitSpeechRecognition`) to convert the learner's spoken input into text (`lang="es-ES"`).
+- **Transcript Comparison**: Submits the recognized text to Django's authoritative answer-validation system (`POST /api/lessons/<id>/answer/`). Note: Validation is transcript-based comparison with punctuation, whitespace, and diacritic/accent normalization rather than advanced phoneme-level acoustic scoring.
+- **Permission & Compatibility Handling**: Gracefully detects browser support and microphone permission states with user-friendly retry controls without crashing the lesson flow.
+
+### AI Speaking Feedback
+- **Gemini AI Enrichment**: If an incorrect speaking answer is submitted, learners can trigger optional AI feedback (`POST /api/ai/speaking-feedback/`) to receive short, encouraging explanations of what they said versus the target phrase.
+
 
 ### 🤖 Server-Side Gemini AI Integration
 - **Secure Backend API Integration**: Uses Google's official `google-genai` Python SDK on Django server (`GEMINI_API_KEY` is 100% server-side and never exposed to client JS).

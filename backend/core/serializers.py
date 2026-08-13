@@ -39,10 +39,13 @@ class ExercisePublicSerializer(serializers.ModelSerializer):
             'MATCH_PAIRS': 'match_pairs',
             'FILL_BLANK': 'fill_blank',
             'TYPE_ANSWER': 'type_answer',
+            'LISTENING': 'listening',
+            'SPEAKING': 'speaking',
         }
         return mapping.get(obj.exercise_type, obj.exercise_type.lower())
 
     def get_data(self, obj):
+        res = {}
         if obj.exercise_type == Exercise.ExerciseType.MATCH_PAIRS:
             # Provide structured pair options without revealing answer mapping
             raw_options = obj.options if isinstance(obj.options, list) else []
@@ -53,12 +56,14 @@ class ExercisePublicSerializer(serializers.ModelSerializer):
                     left_items.append(item['pair'][0])
                     right_items.append(item['pair'][1])
 
-            return {
+            res.update({
                 'left_items': left_items,
                 'right_items': right_items,
                 'pairs': raw_options
-            }
-        return {}
+            })
+        elif obj.exercise_type in (Exercise.ExerciseType.LISTENING, Exercise.ExerciseType.SPEAKING):
+            res['audio_text'] = obj.audio_text or obj.correct_answer or obj.question
+        return res
 
 
 class LessonPublicSerializer(serializers.ModelSerializer):

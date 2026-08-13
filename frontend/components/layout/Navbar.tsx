@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Mascot } from '../ui/Mascot';
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
+import { LanguageSelectorModal } from '../ui/LanguageSelectorModal';
+import { SuperSubscriptionModal } from '../ui/SuperSubscriptionModal';
 import {
   Home as HomeIcon,
   Bot,
@@ -14,14 +17,27 @@ import {
   Settings as SettingsIcon,
   LogOut,
   Menu,
-  X
+  X,
+  Zap
 } from 'lucide-react';
+
+const FLAG_MAP: Record<string, string> = {
+  Spanish: '🇪🇸',
+  English: '🇺🇸',
+  French: '🇫🇷',
+  German: '🇩🇪',
+  Japanese: '🇯🇵',
+};
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { activeLanguage } = useSettings();
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [langModalOpen, setLangModalOpen] = useState(false);
+  const [superModalOpen, setSuperModalOpen] = useState(false);
 
   const navItems = [
     { name: 'Home', href: '/', icon: HomeIcon },
@@ -43,16 +59,40 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
+      <LanguageSelectorModal isOpen={langModalOpen} onClose={() => setLangModalOpen(false)} />
+      <SuperSubscriptionModal isOpen={superModalOpen} onClose={() => setSuperModalOpen(false)} />
+
       {/* Top Desktop & Mobile Header Bar */}
       <header className="sticky top-0 z-40 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b-2 border-zinc-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          {/* Brand Identity Logo */}
-          <Link href="/" className="flex items-center gap-2.5 shrink-0 group mr-2">
-            <Mascot mood="happy" size="sm" />
-            <span className="font-black text-2xl tracking-tight text-[#58CC02]">
-              Learnly
-            </span>
-          </Link>
+          {/* Brand Identity Logo & Language Selector */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <Link href="/" className="flex items-center gap-2 shrink-0 group">
+              <Mascot mood="happy" size="sm" />
+              <span className="font-black text-2xl tracking-tight text-[#58CC02]">
+                Learnly
+              </span>
+            </Link>
+
+            {/* Language Selector Button */}
+            <button
+              onClick={() => setLangModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 text-xs font-black transition cursor-pointer"
+              title="Change active language"
+            >
+              <span>{FLAG_MAP[activeLanguage] || '🇪🇸'}</span>
+              <span className="hidden sm:inline text-zinc-700 dark:text-zinc-300 uppercase tracking-wider">{activeLanguage}</span>
+            </button>
+          </div>
+
+          {/* Super Subscription Badge Button */}
+          <button
+            onClick={() => setSuperModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-black font-black text-xs uppercase tracking-wider shadow-sm transition cursor-pointer border border-amber-600 shrink-0"
+          >
+            <Zap className="w-3.5 h-3.5 fill-black" />
+            <span className="hidden sm:inline">SUPER</span>
+          </button>
 
           {/* Desktop Navigation Links & Logout */}
           <nav className="hidden lg:flex items-center gap-1.5 xl:gap-3">

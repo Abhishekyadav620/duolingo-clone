@@ -161,13 +161,29 @@ class Command(BaseCommand):
                 },
                 {
                     'order': 2,
+                    'exercise_type': Exercise.ExerciseType.LISTENING,
+                    'question': 'What did you hear?',
+                    'correct_answer': 'Buenos días',
+                    'audio_text': 'Buenos días',
+                    'options': ['Buenos días', 'Buenas noches', 'Gracias', 'Hola']
+                },
+                {
+                    'order': 3,
                     'exercise_type': Exercise.ExerciseType.TRANSLATE,
                     'question': 'Translate "Goodbye" into Spanish.',
                     'correct_answer': 'adiós',
                     'options': ['hola', 'adiós', 'gracias', 'por favor']
                 },
                 {
-                    'order': 3,
+                    'order': 4,
+                    'exercise_type': Exercise.ExerciseType.SPEAKING,
+                    'question': 'Say this sentence',
+                    'correct_answer': 'Buenos días',
+                    'audio_text': 'Buenos días',
+                    'options': []
+                },
+                {
+                    'order': 5,
                     'exercise_type': Exercise.ExerciseType.MATCH_PAIRS,
                     'question': 'Match the Spanish words with their English translations.',
                     'correct_answer': 'Hola:Hello, Gracias:Thank you, Adiós:Goodbye',
@@ -178,14 +194,14 @@ class Command(BaseCommand):
                     ]
                 },
                 {
-                    'order': 4,
+                    'order': 6,
                     'exercise_type': Exercise.ExerciseType.FILL_BLANK,
                     'question': '___ días, señor.',
                     'correct_answer': 'Buenos',
                     'options': ['Buenos', 'Buenas', 'Hola', 'Gracias']
                 },
                 {
-                    'order': 5,
+                    'order': 7,
                     'exercise_type': Exercise.ExerciseType.TYPE_ANSWER,
                     'question': 'Translate "Thank you" into Spanish.',
                     'correct_answer': 'gracias',
@@ -202,13 +218,29 @@ class Command(BaseCommand):
                 },
                 {
                     'order': 2,
+                    'exercise_type': Exercise.ExerciseType.LISTENING,
+                    'question': 'What did you hear?',
+                    'correct_answer': 'Hola',
+                    'audio_text': 'Hola',
+                    'options': ['Hola', 'Adiós', 'Gracias', 'Por favor']
+                },
+                {
+                    'order': 3,
+                    'exercise_type': Exercise.ExerciseType.SPEAKING,
+                    'question': 'Say this sentence',
+                    'correct_answer': '¿Cómo estás?',
+                    'audio_text': '¿Cómo estás?',
+                    'options': []
+                },
+                {
+                    'order': 4,
                     'exercise_type': Exercise.ExerciseType.TRANSLATE,
                     'question': 'Translate "Good morning" into Spanish.',
                     'correct_answer': 'buenos días',
                     'options': ['buenos días', 'buenas noches', 'hasta luego', 'hola']
                 },
                 {
-                    'order': 3,
+                    'order': 5,
                     'exercise_type': Exercise.ExerciseType.MATCH_PAIRS,
                     'question': 'Match the phrases.',
                     'correct_answer': 'Por favor:Please, De nada:You are welcome, Sí:Yes',
@@ -219,14 +251,14 @@ class Command(BaseCommand):
                     ]
                 },
                 {
-                    'order': 4,
+                    'order': 6,
                     'exercise_type': Exercise.ExerciseType.FILL_BLANK,
                     'question': 'Hasta ___, amigo.',
                     'correct_answer': 'luego',
                     'options': ['luego', 'gracias', 'hola', 'por']
                 },
                 {
-                    'order': 5,
+                    'order': 7,
                     'exercise_type': Exercise.ExerciseType.TYPE_ANSWER,
                     'question': 'Translate "Yes" into Spanish.',
                     'correct_answer': 'sí',
@@ -243,6 +275,22 @@ class Command(BaseCommand):
                 },
                 {
                     'order': 2,
+                    'exercise_type': Exercise.ExerciseType.LISTENING,
+                    'question': 'What did you hear?',
+                    'correct_answer': 'Gracias',
+                    'audio_text': 'Gracias',
+                    'options': ['Gracias', 'De nada', 'Por favor', 'Hola']
+                },
+                {
+                    'order': 3,
+                    'exercise_type': Exercise.ExerciseType.SPEAKING,
+                    'question': 'Say this sentence',
+                    'correct_answer': 'Me llamo Ana',
+                    'audio_text': 'Me llamo Ana',
+                    'options': []
+                },
+                {
+                    'order': 4,
                     'exercise_type': Exercise.ExerciseType.TRANSLATE,
                     'question': 'Translate "School" into Spanish.',
                     'correct_answer': 'escuela',
@@ -820,6 +868,7 @@ class Command(BaseCommand):
                         'exercise_type': ex_data['exercise_type'],
                         'question': ex_data['question'],
                         'correct_answer': ex_data['correct_answer'],
+                        'audio_text': ex_data.get('audio_text', ''),
                         'options': ex_data['options']
                     }
                 )

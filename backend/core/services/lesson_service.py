@@ -1,16 +1,22 @@
 import re
+import unicodedata
 from core.models import Exercise, UserExerciseSubmission, UserProfile
 
 
-def normalize_text(text: str) -> str:
+def normalize_text(text: str, strip_accents: bool = False) -> str:
     """
     Trims leading/trailing whitespace, converts to lowercase,
-    and strips common trailing Spanish/English punctuation marks.
+    collapses extra whitespace, and strips punctuation.
+    Optionally strips accents/diacritics for transcript matching.
     """
     if not text:
         return ""
     cleaned = text.strip().lower()
-    cleaned = re.sub(r'[¡!¿?.,;]', '', cleaned)
+    if strip_accents:
+        cleaned = unicodedata.normalize('NFD', cleaned)
+        cleaned = ''.join(c for c in cleaned if unicodedata.category(c) != 'Mn')
+    cleaned = re.sub(r'[¡!¿?.,;:"]', '', cleaned)
+    cleaned = re.sub(r'\s+', ' ', cleaned)
     return cleaned.strip()
 
 
@@ -44,12 +50,19 @@ def validate_exercise_answer(exercise: Exercise, submitted_answer: str) -> tuple
             expected
         )
 
-    # Simple text / choice comparison
-    is_correct = clean_sub == clean_exp
+    # For text, listening, speaking, translate, type_answer:
+    # First try exact normalized match; if speaking/listening/type_answer, allow accent tolerance
+    is_correct = (clean_sub == clean_exp)
+    if not is_correct:
+        clean_sub_no_accents = normalize_text(submitted_answer, strip_accents=True)
+        clean_exp_no_accents = normalize_text(expected, strip_accents=True)
+        is_correct = (clean_sub_no_accents == clean_exp_no_accents)
+
+    feedback = "Great pronunciation!" if (is_correct and exercise.exercise_type == Exercise.ExerciseType.SPEAKING) else ("Correct!" if is_correct else "Not quite.")
 
     return (
         is_correct,
-        "Correct!" if is_correct else "Not quite.",
+        feedback,
         expected
     )
 

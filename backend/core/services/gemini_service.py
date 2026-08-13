@@ -188,5 +188,41 @@ Provide a short, 3-sentence celebratory summary:
             logger.error(f"Gemini summarize_lesson error: {e}")
             return f"Congratulations on finishing {lesson_title}! Keep practicing every day."
 
+    def explain_speaking_mistake(self, expected_text: str, recognized_text: str) -> str:
+        client, model_name = self.get_client()
+        if not client:
+            return f"Your answer meant something else than '{expected_text}'. Try saying '{expected_text}' once more."
+
+        prompt = f"""
+You are a beginner Spanish language tutor.
+
+Compare the learner's recognized speech with the target Spanish phrase.
+
+Target:
+{expected_text}
+
+Learner said:
+{recognized_text}
+
+Give a very short and encouraging explanation.
+
+Rules:
+- Do not invent pronunciation problems.
+- Only discuss the difference between the target and recognized text.
+- Do not award XP.
+- Do not determine correctness.
+- Do not reveal hidden information.
+- Keep the response under 3 sentences.
+"""
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+            )
+            return response.text.strip() if response.text else f"Try saying '{expected_text}' once more."
+        except Exception as e:
+            logger.error(f"Gemini explain_speaking_mistake error: {e}")
+            return f"Try saying '{expected_text}' once more."
+
 # Singleton instance
 gemini_service = GeminiService()

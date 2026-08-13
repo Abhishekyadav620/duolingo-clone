@@ -1,4 +1,4 @@
-export type ExerciseType = 'multiple_choice' | 'translate' | 'match_pairs' | 'fill_blank' | 'type_answer';
+export type ExerciseType = 'multiple_choice' | 'translate' | 'match_pairs' | 'fill_blank' | 'type_answer' | 'listening' | 'speaking';
 
 export interface UserResponse {
   id: number;
@@ -21,6 +21,7 @@ export interface PublicExercise {
     left_items?: string[];
     right_items?: string[];
     pairs?: Array<{ pair: [string, string] }>;
+    audio_text?: string;
     [key: string]: unknown;
   };
   order: number;
@@ -184,6 +185,10 @@ export interface AIWordExplainResponse {
 
 export interface AILessonSummaryResponse {
   summary: string;
+}
+
+export interface AISpeakingFeedbackResponse {
+  feedback: string;
 }
 
 export interface AuthResponse {

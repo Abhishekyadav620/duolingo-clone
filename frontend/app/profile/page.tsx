@@ -6,7 +6,6 @@ import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { StatCard } from '@/components/profile/StatCard';
 import { ProgressOverview } from '@/components/profile/ProgressOverview';
 import { SkillStats } from '@/components/profile/SkillStats';
-import { AchievementCard } from '@/components/profile/AchievementCard';
 import { DailyGoal } from '@/components/gamification/DailyGoal';
 import { LoadingSkeleton } from '@/components/ui/LoadingSkeleton';
 import { Button } from '@/components/ui/Button';
@@ -16,12 +15,14 @@ import { ProfileResponse, ProgressResponse } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
+import { AchievementsGrid } from '@/components/profile/AchievementsGrid';
+import { FriendsList } from '@/components/profile/FriendsList';
+
 import {
   Flame,
   Star,
   Trophy,
   BookOpen,
-  Sparkles,
   AlertTriangle,
   RefreshCw,
   LogOut
@@ -102,7 +103,7 @@ export default function ProfilePage() {
             <div className="w-16 h-16 rounded-2xl bg-red-100 dark:bg-red-950/60 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto">
               <AlertTriangle className="w-8 h-8" />
             </div>
-            <h2 className="text-xl font-black text-zinc-900 dark:text-white">Unable to load profile</h2>
+            <h2 className="text-1xl font-black text-zinc-900 dark:text-white">Unable to load profile</h2>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">{error || 'Network request failed.'}</p>
             <Button variant="primary" onClick={loadData} fullWidth>
               <RefreshCw className="w-4 h-4 mr-2" />
@@ -175,27 +176,24 @@ export default function ProfilePage() {
                 )}
               </div>
 
-              {/* Right Column: Daily Goal Widget */}
+              {/* Right Column: Daily Goal & Friends */}
               <aside className="space-y-6">
                 <DailyGoal
                   currentXP={profileData.user.xp}
                   dailyGoal={profileData.user.daily_goal}
                 />
+
+                <FriendsList />
               </aside>
             </div>
 
             {/* Achievements Section */}
-            <section className="space-y-4">
-              <h3 className="text-xl font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-amber-500" />
-                <span>Achievements</span>
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {profileData.achievements.map((ach) => (
-                  <AchievementCard key={ach.id} achievement={ach} />
-                ))}
-              </div>
+            <section className="pt-4">
+              <AchievementsGrid
+                userXp={profileData.user.xp}
+                userStreak={profileData.user.streak}
+                completedLessons={profileData.stats.completed_lessons}
+              />
             </section>
           </div>
         )}

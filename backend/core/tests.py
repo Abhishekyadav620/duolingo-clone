@@ -264,4 +264,63 @@ class UserAuthenticationApiTestCase(TestCase):
         self.assertEqual(logout_response.status_code, 200)
 
 
+class ListeningAndSpeakingTestCase(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='audiotester')
+        self.profile = UserProfile.objects.create(user=self.user, xp=0, streak=1, hearts=5)
+        self.course = Course.objects.create(name='Spanish', language='Spanish')
+        self.unit = Unit.objects.create(course=self.course, title='Unit 1', order=1)
+        self.skill = Skill.objects.create(unit=self.unit, title='Greetings', order=1)
+        self.lesson = Lesson.objects.create(skill=self.skill, title='Greetings 1', order=1)
+
+    def test_listening_exercise_validation(self):
+        ex = Exercise.objects.create(
+            lesson=self.lesson,
+            exercise_type=Exercise.ExerciseType.LISTENING,
+            question='What did you hear?',
+            correct_answer='Buenos días',
+            audio_text='Buenos días',
+            options=['Buenos días', 'Buenas noches', 'Gracias'],
+            order=1
+        )
+        is_cor, _, _ = validate_exercise_answer(ex, 'Buenos días')
+        self.assertTrue(is_cor)
+
+        is_cor2, _, _ = validate_exercise_answer(ex, 'buenos dias')
+        self.assertTrue(is_cor2)
+
+        is_cor3, _, _ = validate_exercise_answer(ex, 'Buenas noches')
+        self.assertFalse(is_cor3)
+
+    def test_speaking_exercise_validation(self):
+        ex = Exercise.objects.create(
+            lesson=self.lesson,
+            exercise_type=Exercise.ExerciseType.SPEAKING,
+            question='Say this sentence',
+            correct_answer='¿Cómo estás?',
+            audio_text='¿Cómo estás?',
+            options=[],
+            order=2
+        )
+        is_cor, msg, _ = validate_exercise_answer(ex, 'Como estas')
+        self.assertTrue(is_cor)
+        self.assertEqual(msg, 'Great pronunciation!')
+
+        is_cor2, msg2, _ = validate_exercise_answer(ex, 'Buenas noches')
+        self.assertFalse(is_cor2)
+        self.assertEqual(msg2, 'Not quite.')
+
+    @patch('core.services.gemini_service.gemini_service.explain_speaking_mistake')
+    def test_ai_speaking_feedback_endpoint(self, mock_feedback):
+        mock_feedback.return_value = 'You said Buenas noches (Good night) instead of Buenos días (Good morning).'
+        response = self.client.post('/api/ai/speaking-feedback/', {
+            'expected_text': 'Buenos días',
+            'recognized_text': 'Buenas noches'
+        }, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('feedback', response.data)
+        self.assertEqual(response.data['feedback'], 'You said Buenas noches (Good night) instead of Buenos días (Good morning).')
+
+
+
 
