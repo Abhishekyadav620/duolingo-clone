@@ -17,7 +17,7 @@ except ImportError:
 class GeminiService:
     def get_client(self):
         api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-        model_name = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash").strip()
+        model_name = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash").strip()
 
         if not HAS_GENAI:
             return None, model_name
@@ -58,8 +58,15 @@ RULES:
             )
             return response.text.strip() if response.text else "Review your Spanish vocabulary words carefully."
         except Exception as e:
-            logger.error(f"Gemini generate_hint error: {e}")
-            return f"AI Hint Error: {str(e)}"
+            logger.error(f"Gemini generate_hint error with {model_name}: {e}")
+            try:
+                response = client.models.generate_content(
+                    model="gemini-1.5-flash",
+                    contents=prompt,
+                )
+                return response.text.strip() if response.text else "Review your Spanish vocabulary words carefully."
+            except Exception:
+                return "Think carefully about the Spanish vocabulary words you have learned!"
 
     def explain_mistake(self, question: str, user_answer: str, correct_answer: str) -> str:
         client, model_name = self.get_client()
@@ -88,16 +95,14 @@ RULES:
             return response.text.strip() if response.text else (f"'{clean_correct}' is the right translation here." if clean_correct else "Review the question carefully.")
         except Exception as e:
             logger.error(f"Gemini explain_mistake error: {e}")
-            return f"The correct answer is '{clean_correct}'." if clean_correct else "Please try again."
+            if clean_correct:
+                return f"The correct answer is '{clean_correct}'."
+            return "Please review the options and try again."
 
     def ask_tutor(self, message: str) -> str:
-        api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-        if not api_key or api_key == "your-gemini-api-key-here":
-            return "AI Tutor is offline: Please create the file backend/.env and paste your real GEMINI_API_KEY=AIzaSy... (Get your free key at https://aistudio.google.com/)."
-
         client, model_name = self.get_client()
         if not client:
-            return "AI Tutor is offline: Failed to authenticate with Google Gemini API. Please check your GEMINI_API_KEY in backend/.env."
+            return "¡Hola! I am Lingo Buddy, your AI Spanish tutor. I am currently running in demo mode. To enable real-time Gemini AI responses, please add your GEMINI_API_KEY to backend environment settings!"
 
         system_instruction = """
 You are a friendly, encouraging Spanish AI language tutor named Lingo Buddy.
@@ -115,10 +120,20 @@ Rules:
                     system_instruction=system_instruction
                 )
             )
-            return response.text.strip() if response.text else "I am here to help you learn Spanish! Ask me any question."
+            return response.text.strip() if response.text else "¡Hola! I am here to help you learn Spanish! Ask me any question about vocabulary, grammar, or conjugations."
         except Exception as e:
-            logger.error(f"Gemini ask_tutor error: {e}")
-            return f"Gemini API Error: {str(e)}. Please check your API key at https://aistudio.google.com/."
+            logger.error(f"Gemini ask_tutor error with {model_name}: {e}")
+            try:
+                response = client.models.generate_content(
+                    model="gemini-1.5-flash",
+                    contents=message,
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_instruction
+                    )
+                )
+                return response.text.strip() if response.text else "¡Hola! I am here to help you learn Spanish!"
+            except Exception:
+                return "¡Hola! I am Lingo Buddy. I am having trouble connecting to Google Gemini AI right now. Please verify your GEMINI_API_KEY in the backend settings."
 
     def explain_word(self, word: str) -> Dict[str, str]:
         client, model_name = self.get_client()

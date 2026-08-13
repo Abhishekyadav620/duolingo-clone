@@ -57,7 +57,12 @@ export const AITutor: React.FC = () => {
       };
       setMessages((prev) => [...prev, aiMsg]);
     } catch {
-      setError('Unable to reach AI Tutor. Please check your backend connection or GEMINI_API_KEY.');
+      const fallbackMsg: ChatMessage = {
+        id: `ai-err-${messages.length + 1}`,
+        sender: 'ai',
+        text: '¡Hola! I am Lingo Buddy. I am having trouble connecting to the backend server. Please verify your backend server connection.'
+      };
+      setMessages((prev) => [...prev, fallbackMsg]);
     } finally {
       setLoading(false);
     }
