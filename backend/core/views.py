@@ -167,6 +167,7 @@ class LessonDetailView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request, lesson_id):
+        import random
         try:
             lesson = Lesson.objects.prefetch_related('exercises').get(id=lesson_id)
         except Lesson.DoesNotExist:
@@ -175,8 +176,21 @@ class LessonDetailView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        serializer = LessonPublicSerializer(lesson)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = LessonPublicSerializer(lesson).data
+        exercises = data.get('exercises', [])
+        # Randomize exercise sequence for fresh practice
+        random.shuffle(exercises)
+
+        # Randomize multiple choice options sequence
+        for ex in exercises:
+            if isinstance(ex.get('options'), list) and len(ex['options']) > 1:
+                opts = list(ex['options'])
+                if all(isinstance(opt, str) for opt in opts):
+                    random.shuffle(opts)
+                    ex['options'] = opts
+
+        data['exercises'] = exercises
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class AnswerSubmissionView(APIView):

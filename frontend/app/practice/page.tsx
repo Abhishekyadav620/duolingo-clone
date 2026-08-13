@@ -28,7 +28,23 @@ interface TimedQuestion {
   correct: string;
 }
 
-const TIMED_QUESTIONS: TimedQuestion[] = [
+interface ListeningQuestion {
+  phrase: string;
+  choices: { label: string; isCorrect: boolean }[];
+}
+
+// Utility to shuffle an array (Fisher-Yates)
+function shuffleArray<T>(array: T[]): T[] {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Expanded Pool of 25+ Questions
+const QUESTION_BANK: TimedQuestion[] = [
   { question: 'What does "Hola" mean?', spanishText: 'Hola', options: ['Hello', 'Goodbye', 'Thank you', 'Please'], correct: 'Hello' },
   { question: 'Translate "Good morning"', spanishText: 'Buenos días', options: ['Buenos días', 'Buenas noches', 'Hasta luego', 'Por favor'], correct: 'Buenos días' },
   { question: 'What does "Gracias" mean?', spanishText: 'Gracias', options: ['Please', 'Thank you', 'Yes', 'No'], correct: 'Thank you' },
@@ -39,16 +55,93 @@ const TIMED_QUESTIONS: TimedQuestion[] = [
   { question: 'Translate "Friend" into Spanish', spanishText: 'Amigo', options: ['Gato', 'Amigo', 'Madre', 'Hermano'], correct: 'Amigo' },
   { question: 'What does "Noche" mean?', spanishText: 'Noche', options: ['Day', 'Night', 'Morning', 'Week'], correct: 'Night' },
   { question: 'Translate "Bread" into Spanish', spanishText: 'Pan', options: ['Pan', 'Fruta', 'Queso', 'Leche'], correct: 'Pan' },
+  { question: 'What does "Gato" mean?', spanishText: 'Gato', options: ['Cat', 'Dog', 'Horse', 'Mouse'], correct: 'Cat' },
+  { question: 'Translate "Mother" into Spanish', spanishText: 'Madre', options: ['Madre', 'Padre', 'Hermana', 'Abuela'], correct: 'Madre' },
+  { question: 'What does "Escuela" mean?', spanishText: 'Escuela', options: ['School', 'House', 'Store', 'Park'], correct: 'School' },
+  { question: 'Translate "Where?" into Spanish', spanishText: '¿Dónde?', options: ['¿Dónde?', '¿Qué?', '¿Quién?', '¿Cuándo?'], correct: '¿Dónde?' },
+  { question: 'What does "Playa" mean?', spanishText: 'Playa', options: ['Beach', 'Park', 'City', 'River'], correct: 'Beach' },
+  { question: 'Translate "Good night" into Spanish', spanishText: 'Buenas noches', options: ['Buenas noches', 'Buenos días', 'Buenas tardes', 'Hasta luego'], correct: 'Buenas noches' },
+  { question: 'What does "Trabajo" mean?', spanishText: 'Trabajo', options: ['Work', 'Sleep', 'Travel', 'Study'], correct: 'Work' },
+  { question: 'Translate "Fish" into Spanish', spanishText: 'Pez', options: ['Pez', 'Pájaro', 'Vaca', 'Caballo'], correct: 'Pez' },
+  { question: 'What does "¿Cómo estás?" mean?', spanishText: '¿Cómo estás?', options: ['How are you?', 'What is your name?', 'Where do you live?', 'How old are you?'], correct: 'How are you?' },
+  { question: 'Translate "Milk" into Spanish', spanishText: 'Leche', options: ['Leche', 'Café', 'Agua', 'Jugo'], correct: 'Leche' },
+  { question: 'What does "Sol" mean?', spanishText: 'Sol', options: ['Sun', 'Moon', 'Star', 'Cloud'], correct: 'Sun' },
+  { question: 'Translate "Brother" into Spanish', spanishText: 'Hermano', options: ['Hermano', 'Padre', 'Hijo', 'Tío'], correct: 'Hermano' },
+  { question: 'What does "Parque" mean?', spanishText: 'Parque', options: ['Park', 'Beach', 'Museum', 'Street'], correct: 'Park' },
+  { question: 'Translate "Apple" into Spanish', spanishText: 'Manzana', options: ['Manzana', 'Pan', 'Fruta', 'Queso'], correct: 'Manzana' },
+  { question: 'What does "Hasta luego" mean?', spanishText: 'Hasta luego', options: ['See you later', 'Good morning', 'Nice to meet you', 'Excuse me'], correct: 'See you later' }
+];
+
+// Pool of Speaking Phrases
+const SPEAKING_PHRASES = [
+  'Hola, ¿cómo estás?',
+  'Buenos días, mucho gusto.',
+  'Me llamo Ana y vivo aquí.',
+  'Un vaso de agua, por favor.',
+  'La casa es bonita y grande.',
+  'Hasta luego, mi amigo.',
+  'Gracias por la comida deliciosa.'
+];
+
+// Pool of Listening Exercises
+const LISTENING_POOL: ListeningQuestion[] = [
+  {
+    phrase: 'Hola, ¿cómo estás?',
+    choices: [
+      { label: 'A. Good morning', isCorrect: false },
+      { label: 'B. Hello, how are you?', isCorrect: true },
+      { label: 'C. Where are you going?', isCorrect: false },
+      { label: 'D. See you tomorrow', isCorrect: false },
+    ]
+  },
+  {
+    phrase: 'Buenos días, señor',
+    choices: [
+      { label: 'A. Good morning, sir', isCorrect: true },
+      { label: 'B. Good night, friend', isCorrect: false },
+      { label: 'C. Thank you very much', isCorrect: false },
+      { label: 'D. Please come in', isCorrect: false },
+    ]
+  },
+  {
+    phrase: '¿Dónde está el parque?',
+    choices: [
+      { label: 'A. What time is it?', isCorrect: false },
+      { label: 'B. Where is the park?', isCorrect: true },
+      { label: 'C. I am going home', isCorrect: false },
+      { label: 'D. Is the school open?', isCorrect: false },
+    ]
+  },
+  {
+    phrase: 'Me gusta comer pan',
+    choices: [
+      { label: 'A. I like to drink milk', isCorrect: false },
+      { label: 'B. I like to eat bread', isCorrect: true },
+      { label: 'C. I have a big cat', isCorrect: false },
+      { label: 'D. Good afternoon', isCorrect: false },
+    ]
+  },
+  {
+    phrase: 'La casa es muy grande',
+    choices: [
+      { label: 'A. The house is very big', isCorrect: true },
+      { label: 'B. The park is small', isCorrect: false },
+      { label: 'C. The dog is running', isCorrect: false },
+      { label: 'D. See you later', isCorrect: false },
+    ]
+  }
 ];
 
 export default function PracticePage() {
   const [activeTab, setActiveTab] = useState<PracticeTab>('hub');
 
   // --- 1. Speaking Practice State ---
+  const [speakingIndex, setSpeakingIndex] = useState<number>(0);
   const [speakingState, setSpeakingState] = useState<'Ready' | 'Listening' | 'Processing' | 'Completed'>('Ready');
   const [speakingScore, setSpeakingScore] = useState<number | null>(null);
   const [speakingRating, setSpeakingRating] = useState<'Excellent' | 'Good' | 'Needs Practice'>('Good');
-  const targetPhrase = 'Hola, ¿cómo estás?';
+
+  const targetPhrase = SPEAKING_PHRASES[speakingIndex % SPEAKING_PHRASES.length];
 
   const handleStartSpeaking = () => {
     setSpeakingState('Listening');
@@ -68,20 +161,25 @@ export default function PracticePage() {
   const handleResetSpeaking = () => {
     setSpeakingState('Ready');
     setSpeakingScore(null);
+    setSpeakingIndex((prev) => (prev + 1) % SPEAKING_PHRASES.length);
   };
 
   // --- 2. Listening Practice State ---
-  const listeningPhrase = 'Hola, ¿cómo estás?';
-  const listeningChoices = [
-    { label: 'A. Good morning', isCorrect: false },
-    { label: 'B. Hello, how are you?', isCorrect: true },
-    { label: 'C. Where are you going?', isCorrect: false },
-    { label: 'D. See you tomorrow', isCorrect: false },
-  ];
+  const [listeningIndex, setListeningIndex] = useState<number>(0);
+  const currentListeningEx = LISTENING_POOL[listeningIndex % LISTENING_POOL.length];
   const [selectedListening, setSelectedListening] = useState<number | null>(null);
   const [listeningSubmitted, setListeningSubmitted] = useState<boolean>(false);
 
-  // --- 3. Timed Challenge State ---
+  const handleNextListening = () => {
+    setSelectedListening(null);
+    setListeningSubmitted(false);
+    setListeningIndex((prev) => (prev + 1) % LISTENING_POOL.length);
+  };
+
+  // --- 3. Timed & Legendary Question State (Randomized Array) ---
+  const [activeQuestions, setActiveQuestions] = useState<TimedQuestion[]>([]);
+
+  // --- Timed Challenge State ---
   const [timedIndex, setTimedIndex] = useState<number>(0);
   const [timeLeft, setTimeLeft] = useState<number>(60);
   const [timedScore, setTimedScore] = useState<number>(0);
@@ -107,6 +205,14 @@ export default function PracticePage() {
   }, [timedActive]);
 
   const startTimedChallenge = () => {
+    const shuffled = shuffleArray(QUESTION_BANK).slice(0, 10);
+    // Shuffle options inside each question as well
+    const fullyShuffled = shuffled.map(q => ({
+      ...q,
+      options: shuffleArray(q.options)
+    }));
+
+    setActiveQuestions(fullyShuffled);
     setTimedIndex(0);
     setTimeLeft(60);
     setTimedScore(0);
@@ -116,15 +222,15 @@ export default function PracticePage() {
   };
 
   const handleAnswerTimed = (option: string) => {
-    if (selectedTimedOption || !timedActive) return;
+    if (selectedTimedOption || !timedActive || !activeQuestions[timedIndex]) return;
     setSelectedTimedOption(option);
-    const q = TIMED_QUESTIONS[timedIndex];
+    const q = activeQuestions[timedIndex];
     if (option === q.correct) {
       setTimedScore((prev) => prev + 1);
     }
 
     setTimeout(() => {
-      if (timedIndex + 1 < TIMED_QUESTIONS.length) {
+      if (timedIndex + 1 < activeQuestions.length) {
         setTimedIndex((prev) => prev + 1);
         setSelectedTimedOption(null);
       } else {
@@ -143,6 +249,13 @@ export default function PracticePage() {
   const [selectedLegendary, setSelectedLegendary] = useState<string | null>(null);
 
   const startLegendaryChallenge = () => {
+    const shuffled = shuffleArray(QUESTION_BANK).slice(0, 10);
+    const fullyShuffled = shuffled.map(q => ({
+      ...q,
+      options: shuffleArray(q.options)
+    }));
+
+    setActiveQuestions(fullyShuffled);
     setLegendaryIndex(0);
     setLegendaryHearts(3);
     setLegendaryScore(0);
@@ -152,9 +265,9 @@ export default function PracticePage() {
   };
 
   const handleAnswerLegendary = (option: string) => {
-    if (selectedLegendary || !legendaryActive) return;
+    if (selectedLegendary || !legendaryActive || !activeQuestions[legendaryIndex]) return;
     setSelectedLegendary(option);
-    const q = TIMED_QUESTIONS[legendaryIndex];
+    const q = activeQuestions[legendaryIndex];
 
     if (option === q.correct) {
       setLegendaryScore((prev) => prev + 1);
@@ -163,7 +276,7 @@ export default function PracticePage() {
     }
 
     setTimeout(() => {
-      if (legendaryHearts - (option === q.correct ? 0 : 1) <= 0 || legendaryIndex + 1 >= TIMED_QUESTIONS.length) {
+      if (legendaryHearts - (option === q.correct ? 0 : 1) <= 0 || legendaryIndex + 1 >= activeQuestions.length) {
         setLegendaryActive(false);
         setLegendaryFinished(true);
       } else {
@@ -201,8 +314,12 @@ export default function PracticePage() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as PracticeTab)}
-                className={`px-3 py-1.5 rounded-xl font-black text-xs uppercase tracking-wider transition cursor-pointer whitespace-nowrap ${
+                onClick={() => {
+                  setActiveTab(tab.id as PracticeTab);
+                  if (tab.id === 'timed') startTimedChallenge();
+                  if (tab.id === 'legendary') startLegendaryChallenge();
+                }}
+                className={`px-3.5 py-2 rounded-xl text-xs font-black transition whitespace-nowrap cursor-pointer ${
                   activeTab === tab.id
                     ? 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-xs'
                     : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
@@ -214,53 +331,68 @@ export default function PracticePage() {
           </div>
         </div>
 
-        {/* --- MODE 1: ALL MODES HUB --- */}
+        {/* --- MODE 1: ALL MODES HUB GRID --- */}
         {activeTab === 'hub' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Speaking Card */}
-            <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 space-y-4 hover:border-rose-400 transition shadow-xs">
+            {/* Speaking Practice Card */}
+            <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 space-y-4 shadow-sm hover:border-[#FF4B4B] transition">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-[#FF4B4B] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/60 text-[#FF4B4B] flex items-center justify-center shadow-xs">
                   <Mic className="w-6 h-6" />
                 </div>
                 <div>
                   <h3 className="text-xl font-black text-zinc-900 dark:text-white">Speaking Practice</h3>
-                  <p className="text-xs text-zinc-400 font-medium">Test & improve your Spanish pronunciation</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Practice Spanish pronunciation with AI feedback</p>
                 </div>
               </div>
-              <Button variant="primary" fullWidth onClick={() => setActiveTab('speaking')}>
+              <Button
+                variant="primary"
+                fullWidth
+                onClick={() => setActiveTab('speaking')}
+                className="bg-[#FF4B4B] border-[#E03838] hover:bg-rose-600"
+              >
                 Start Speaking Practice
               </Button>
             </div>
 
-            {/* Listening Card */}
-            <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 space-y-4 hover:border-sky-400 transition shadow-xs">
+            {/* Listening Practice Card */}
+            <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 space-y-4 shadow-sm hover:border-[#1CB0F6] transition">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-sky-100 dark:bg-sky-950/60 text-[#1CB0F6] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-sky-100 dark:bg-sky-950/60 text-[#1CB0F6] flex items-center justify-center shadow-xs">
                   <Volume2 className="w-6 h-6" />
                 </div>
                 <div>
                   <h3 className="text-xl font-black text-zinc-900 dark:text-white">Listening Practice</h3>
-                  <p className="text-xs text-zinc-400 font-medium">Listen and identify spoken vocabulary</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">Train your ear with Spanish spoken sentences</p>
                 </div>
               </div>
-              <Button variant="secondary" fullWidth onClick={() => setActiveTab('listening')}>
+              <Button
+                variant="primary"
+                fullWidth
+                onClick={() => setActiveTab('listening')}
+                className="bg-[#1CB0F6] border-[#0092DF] hover:bg-sky-400"
+              >
                 Start Listening Practice
               </Button>
             </div>
 
             {/* Timed Challenge Card */}
-            <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 space-y-4 hover:border-amber-400 transition shadow-xs">
+            <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 space-y-4 shadow-sm hover:border-amber-400 transition">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center">
-                  <Clock className="w-6 h-6" />
+                <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center shadow-xs">
+                  <Zap className="w-6 h-6 fill-amber-400" />
                 </div>
                 <div>
                   <h3 className="text-xl font-black text-zinc-900 dark:text-white">Timed Challenge</h3>
-                  <p className="text-xs text-zinc-400 font-medium">60 seconds to answer 10 questions</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">60-second rapid-fire Spanish question blitz</p>
                 </div>
               </div>
-              <Button variant="primary" fullWidth onClick={() => { setActiveTab('timed'); startTimedChallenge(); }}>
+              <Button
+                variant="secondary"
+                fullWidth
+                onClick={() => { setActiveTab('timed'); startTimedChallenge(); }}
+                className="bg-amber-400 border-amber-500 text-black font-black hover:bg-amber-300"
+              >
                 Start 60s Challenge
               </Button>
             </div>
@@ -277,7 +409,7 @@ export default function PracticePage() {
                     <span>LEGENDARY</span>
                   </div>
                   <h3 className="text-xl font-black text-white">Legendary Mode</h3>
-                  <p className="text-xs text-zinc-400 font-medium">10 hard questions • 100 XP + 20 Gems</p>
+                  <p className="text-xs text-zinc-400 font-medium">10 randomized questions • 3 hearts • High XP</p>
                 </div>
               </div>
               <Button
@@ -298,7 +430,7 @@ export default function PracticePage() {
             <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
               <div className="text-center space-y-2">
                 <span className="text-xs font-black uppercase tracking-widest text-[#FF4B4B] bg-rose-50 dark:bg-rose-950/60 px-3 py-1 rounded-full border border-rose-200 dark:border-rose-900">
-                  Pronunciation Practice
+                  Pronunciation Practice #{speakingIndex + 1}
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white">
                   Say this sentence:
@@ -367,17 +499,10 @@ export default function PracticePage() {
                     </p>
                   </div>
 
-                  <div className="text-[11px] text-zinc-400 font-semibold italic">
-                    Note: Pronunciation evaluation is simulated for demonstration.
-                  </div>
-
-                  <div className="flex gap-3 pt-2">
-                    <Button variant="secondary" fullWidth onClick={handleResetSpeaking}>
+                  <div className="pt-2">
+                    <Button variant="primary" fullWidth onClick={handleResetSpeaking}>
                       <RefreshCw className="w-4 h-4 mr-2" />
-                      Try Again
-                    </Button>
-                    <Button variant="primary" fullWidth onClick={() => setActiveTab('hub')}>
-                      Continue
+                      Try Another Sentence
                     </Button>
                   </div>
                 </motion.div>
@@ -392,7 +517,7 @@ export default function PracticePage() {
             <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
               <div className="text-center space-y-2">
                 <span className="text-xs font-black uppercase tracking-widest text-[#1CB0F6] bg-sky-50 dark:bg-sky-950/60 px-3 py-1 rounded-full border border-sky-200 dark:border-sky-900">
-                  Listening Exercise
+                  Listening Exercise #{listeningIndex + 1}
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white">
                   Listen and choose what you hear:
@@ -404,7 +529,7 @@ export default function PracticePage() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => speakText(listeningPhrase, 'es-ES')}
+                  onClick={() => speakText(currentListeningEx.phrase, 'es-ES')}
                   className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-[#1CB0F6] hover:bg-sky-400 text-white font-black text-lg shadow-md transition cursor-pointer"
                 >
                   <Volume2 className="w-7 h-7" />
@@ -417,7 +542,7 @@ export default function PracticePage() {
 
               {/* Answer Choices */}
               <div className="space-y-3">
-                {listeningChoices.map((choice, i) => {
+                {currentListeningEx.choices.map((choice, i) => {
                   const isSelected = selectedListening === i;
                   const showWrong = listeningSubmitted && isSelected && !choice.isCorrect;
                   const showCorrect = listeningSubmitted && choice.isCorrect;
@@ -447,12 +572,13 @@ export default function PracticePage() {
 
               {listeningSubmitted && (
                 <div className="space-y-3 pt-2">
-                  {selectedListening !== null && !listeningChoices[selectedListening].isCorrect && (
+                  {selectedListening !== null && !currentListeningEx.choices[selectedListening].isCorrect && (
                     <div className="p-3 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 rounded-2xl text-xs font-black text-rose-700 dark:text-rose-200">
-                      The correct option is: <span className="underline">{listeningChoices.find(c => c.isCorrect)?.label}</span>
+                      The correct option is: <span className="underline">{currentListeningEx.choices.find(c => c.isCorrect)?.label}</span>
                     </div>
                   )}
-                  <Button variant="primary" fullWidth onClick={() => { setSelectedListening(null); setListeningSubmitted(false); }}>
+                  <Button variant="primary" fullWidth onClick={handleNextListening}>
+                    <RefreshCw className="w-4 h-4 mr-2" />
                     Try Another Listening Exercise
                   </Button>
                 </div>
@@ -464,7 +590,7 @@ export default function PracticePage() {
         {/* --- MODE 4: TIMED CHALLENGE --- */}
         {activeTab === 'timed' && (
           <div className="max-w-xl mx-auto space-y-6">
-            {!timedFinished ? (
+            {!timedFinished && activeQuestions.length > 0 ? (
               <div className="bg-white dark:bg-zinc-900 border-2 border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
                 {/* Header Timer Bar */}
                 <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-4">
@@ -473,7 +599,7 @@ export default function PracticePage() {
                     <span>{timeLeft}s remaining</span>
                   </div>
                   <div className="font-mono font-black text-sm text-zinc-400">
-                    Q {timedIndex + 1} / {TIMED_QUESTIONS.length}
+                    Q {timedIndex + 1} / {activeQuestions.length}
                   </div>
                 </div>
 
@@ -481,15 +607,15 @@ export default function PracticePage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-2xl font-black text-zinc-900 dark:text-white">
-                      {TIMED_QUESTIONS[timedIndex].question}
+                      {activeQuestions[timedIndex].question}
                     </h3>
-                    <SpeakerButton text={TIMED_QUESTIONS[timedIndex].spanishText} lang="es-ES" />
+                    <SpeakerButton text={activeQuestions[timedIndex].spanishText} lang="es-ES" />
                   </div>
 
                   <div className="grid grid-cols-1 gap-3">
-                    {TIMED_QUESTIONS[timedIndex].options.map((opt) => {
+                    {activeQuestions[timedIndex].options.map((opt) => {
                       const isSelected = selectedTimedOption === opt;
-                      const isCorrectOpt = opt === TIMED_QUESTIONS[timedIndex].correct;
+                      const isCorrectOpt = opt === activeQuestions[timedIndex].correct;
                       const showWrong = selectedTimedOption !== null && isSelected && !isCorrectOpt;
                       const showCorrect = selectedTimedOption !== null && isCorrectOpt;
 
@@ -514,9 +640,9 @@ export default function PracticePage() {
                     })}
                   </div>
 
-                  {selectedTimedOption !== null && selectedTimedOption !== TIMED_QUESTIONS[timedIndex].correct && (
+                  {selectedTimedOption !== null && selectedTimedOption !== activeQuestions[timedIndex].correct && (
                     <div className="p-3 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 rounded-2xl text-xs font-black text-rose-700 dark:text-rose-200">
-                      The correct option is: <span className="underline">{TIMED_QUESTIONS[timedIndex].correct}</span>
+                      The correct option is: <span className="underline">{activeQuestions[timedIndex].correct}</span>
                     </div>
                   )}
                 </div>
@@ -535,7 +661,7 @@ export default function PracticePage() {
                 <div className="grid grid-cols-3 gap-3 py-2">
                   <div className="p-3 bg-zinc-50 dark:bg-zinc-800 rounded-2xl border border-zinc-200 dark:border-zinc-700">
                     <span className="text-[10px] font-black uppercase text-zinc-400 block">Score</span>
-                    <span className="text-xl font-black text-zinc-900 dark:text-white">{timedScore} / {TIMED_QUESTIONS.length}</span>
+                    <span className="text-xl font-black text-zinc-900 dark:text-white">{timedScore} / {activeQuestions.length || 10}</span>
                   </div>
                   <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-900">
                     <span className="text-[10px] font-black uppercase text-amber-600 block">XP Earned</span>
@@ -543,13 +669,14 @@ export default function PracticePage() {
                   </div>
                   <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-900">
                     <span className="text-[10px] font-black uppercase text-emerald-600 block">Accuracy</span>
-                    <span className="text-xl font-black text-emerald-500">{Math.round((timedScore / TIMED_QUESTIONS.length) * 100)}%</span>
+                    <span className="text-xl font-black text-emerald-500">{Math.round((timedScore / (activeQuestions.length || 10)) * 100)}%</span>
                   </div>
                 </div>
 
                 <div className="flex gap-3">
                   <Button variant="secondary" fullWidth onClick={startTimedChallenge}>
-                    Try Again
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Try Again (Randomized)
                   </Button>
                   <Button variant="primary" fullWidth onClick={() => setActiveTab('hub')}>
                     Back to Practice
@@ -563,7 +690,7 @@ export default function PracticePage() {
         {/* --- MODE 5: LEGENDARY CHALLENGE --- */}
         {activeTab === 'legendary' && (
           <div className="max-w-xl mx-auto space-y-6">
-            {!legendaryFinished ? (
+            {!legendaryFinished && activeQuestions.length > 0 ? (
               <div className="bg-gradient-to-b from-zinc-900 to-black border-2 border-amber-500/60 rounded-3xl p-6 sm:p-8 space-y-6 text-white shadow-xl">
                 {/* Header Hearts Bar */}
                 <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
@@ -586,13 +713,13 @@ export default function PracticePage() {
                 {/* Current Question */}
                 <div className="space-y-4">
                   <h3 className="text-2xl font-black text-white">
-                    {TIMED_QUESTIONS[legendaryIndex].question}
+                    {activeQuestions[legendaryIndex].question}
                   </h3>
 
                   <div className="grid grid-cols-1 gap-3">
-                    {TIMED_QUESTIONS[legendaryIndex].options.map((opt) => {
+                    {activeQuestions[legendaryIndex].options.map((opt) => {
                       const isSelected = selectedLegendary === opt;
-                      const isCorrectOpt = opt === TIMED_QUESTIONS[legendaryIndex].correct;
+                      const isCorrectOpt = opt === activeQuestions[legendaryIndex].correct;
                       const showWrong = selectedLegendary !== null && isSelected && !isCorrectOpt;
                       const showCorrect = selectedLegendary !== null && isCorrectOpt;
 
@@ -617,9 +744,9 @@ export default function PracticePage() {
                     })}
                   </div>
 
-                  {selectedLegendary !== null && selectedLegendary !== TIMED_QUESTIONS[legendaryIndex].correct && (
+                  {selectedLegendary !== null && selectedLegendary !== activeQuestions[legendaryIndex].correct && (
                     <div className="p-3 bg-rose-950/80 border border-rose-800 rounded-2xl text-xs font-black text-rose-200">
-                      The correct option is: <span className="underline text-white">{TIMED_QUESTIONS[legendaryIndex].correct}</span>
+                      The correct option is: <span className="underline text-white">{activeQuestions[legendaryIndex].correct}</span>
                     </div>
                   )}
                 </div>
@@ -627,32 +754,25 @@ export default function PracticePage() {
             ) : (
               /* Legendary Results Screen */
               <div className="bg-gradient-to-b from-zinc-900 via-zinc-900 to-black border-2 border-amber-500 rounded-3xl p-8 text-center space-y-6 text-white shadow-2xl">
-                <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-500 to-yellow-300 text-black flex items-center justify-center mx-auto shadow-lg shadow-amber-500/30">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 text-black flex items-center justify-center mx-auto shadow-lg">
                   <Award className="w-10 h-10" />
                 </div>
-
                 <div className="space-y-1">
-                  <h2 className="text-3xl font-black text-amber-400">Legendary Completed!</h2>
-                  <p className="text-xs text-zinc-400 font-semibold">You mastered the difficult Spanish challenge!</p>
+                  <h2 className="text-3xl font-black text-amber-400">Legendary Mode Completed!</h2>
+                  <p className="text-xs font-bold text-zinc-400">You mastered high-level Spanish challenges</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 py-2">
-                  <div className="p-4 bg-zinc-850 rounded-2xl border border-amber-500/40">
-                    <span className="text-[10px] font-black uppercase text-amber-300 block">Reward XP</span>
-                    <span className="text-2xl font-black text-amber-400">+100 XP</span>
-                  </div>
-                  <div className="p-4 bg-zinc-850 rounded-2xl border border-purple-500/40">
-                    <span className="text-[10px] font-black uppercase text-purple-300 block">Reward Gems</span>
-                    <span className="text-2xl font-black text-purple-400">+20 Gems</span>
-                  </div>
+                <div className="p-4 bg-zinc-800/60 rounded-2xl border border-amber-500/40 inline-block font-black text-amber-300 text-lg">
+                  +100 XP & +20 Gems Earned! 👑
                 </div>
 
                 <div className="flex gap-3">
-                  <Button variant="secondary" fullWidth onClick={startLegendaryChallenge}>
-                    Replay Legendary
+                  <Button variant="secondary" fullWidth onClick={startLegendaryChallenge} className="bg-amber-400 text-black font-black">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Play Fresh Random Set
                   </Button>
                   <Button variant="primary" fullWidth onClick={() => setActiveTab('hub')}>
-                    Back to Practice
+                    Back to Practice Hub
                   </Button>
                 </div>
               </div>
